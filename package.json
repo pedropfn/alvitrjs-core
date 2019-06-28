@@ -1,7 +1,7 @@
 {
-  "name": "alvitrjs-core",
+  "name": "alvitrjs",
   "version": "1.0.0",
-  "description": "AlvitrJS is a Microframework for nodejs web development.",
+  "description": "AlvitrJS is a modular microframework for nodejs web development.",
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/index.ts"
