@@ -1,0 +1,22 @@
+{
+  "name": "alvitrjs",
+  "version": "1.0.0",
+  "description": "AlvitrJS is a modular microframework for nodejs web development.",
+  "main": "./index.js",
+  "types": "./@types/index.d.ts",
+  "keywords": [
+    "alvitrjs",
+    "modular",
+    "microframework",
+    "ioc",
+    "control",
+    "provider"
+  ],
+  "author": "Gustavo Fenilli",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^12.0.4",
+    "config": "git+https://github.com/GustavoFenilli/config.git",
+    "router": "git+https://github.com/GustavoFenilli/router.git"
+  }
+}
