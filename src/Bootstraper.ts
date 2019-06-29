@@ -22,7 +22,7 @@ export class Bootstraper {
 
         this._rootPath = rootPath;
 
-        let pp = providersPath ? providersPath : 'config/providers.js';
+        const pp = providersPath ? providersPath : 'config/providers.js';
         this._providersPath = path.join(this._rootPath, pp);
         this._alvitrjsProvidersPath = path.join(path.resolve(__dirname), 'config', 'providers.js');
 
@@ -65,17 +65,17 @@ export class Bootstraper {
 
     private _setRegisteredProviders(): void {
         if (this._fileForProvidersExists(this._alvitrjsProvidersPath))
-            this._constructAndSetProviders(this._alvitrjsProvidersPath);
+            this._constructAndSetProviders(this._alvitrjsProvidersPath, path.resolve(__dirname));
         if (this._fileForProvidersExists(this._providersPath))
-            this._constructAndSetProviders(this._providersPath);
+            this._constructAndSetProviders(this._providersPath, this._rootPath);
     }
 
-    private _constructAndSetProviders(servicePath: string): void {
+    private _constructAndSetProviders(servicePath: string, rootPath: string): void {
         try {
             const application = require(servicePath);
             for (const key in application) {
                 try {
-                    const app = require(path.join(this._rootPath, application[key]));
+                    const app = require(path.join(rootPath, application[key]));
                     const constructor = Object.keys(app)[0];
 
                     const service: IServiceProvider = new app[constructor](this._ioc);
