@@ -150,8 +150,8 @@ it works by calling all services and registering them by IoC Container and Depen
 ### Setting your Providers
 
 To use a service provider you should first create a folder called config and inside it a file called providers.js
-- config
-- - provider.js
+config/
+    provider.js
 index.js
 
 That file is just an object with providers to call
