@@ -47,9 +47,8 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     2. [Listen](#listen)
 2. [IoC Container](#ioc-container)
     1. [What is IoC and DI](#what-is-ioc-and-di)
-    2. [How it works](#how-it-works)
-    3. [Binding and Singleton](#binding-and-singleton)
-    4. [Use the container](#use-the-container)
+    2. [Binding and Singleton](#binding-and-singleton)
+    3. [Use the container](#use-the-container)
 3. [Service Providers](#service-providers)
 4. [Router](#router)
     1. [Methods](#methods)
@@ -84,6 +83,61 @@ boot.listen();
 ```
 
 You can change this behaviour by creating a .env file at the root of the application with PORT
+
+## IoC Container
+
+Before using the IoC and DI we need to know what are they.
+
+### What is IoC and DI
+
+IoC stands for Inversion of Control, meaning that the creation of new classes should be controlled by another
+source instead of the class that needs, why? because this way you can depend on abstractions making it easier to test your code.
+
+DI stands for Dependency Injection, is a pattern to enhance IoC by injecting dependencies when a class need it, without you
+actually needing to instantiate it.
+
+### Binding and Singleton
+
+You can use both bind and singleton, when using the IoC container.
+Bind works by creating a new class every time you call the IoC for that class, it uses a closure to know what you need,
+you can use any other class inside the bind or singleton by using the passed ioc to it.
+
+```javascript
+// This creates a binding for the class
+ioc.bind('foo', (app) => {
+    return new foo();
+});
+
+// You can use another classes inside
+ioc.bind('foo', (app) => {
+    const bar = app.use('bar');
+    return new foo(bar);
+});
+```
+the same goes for singleton, but singleton creates a class only on the first call, the other calls will be using the first created class.
+
+```javascript
+// This creates a binding for the class
+ioc.singleton('foo', (app) => {
+    return new foo();
+});
+
+// You can use another classes inside
+ioc.singleton('foo', (app) => {
+    const bar = app.use('bar');
+    return new foo(bar);
+});
+```
+### Use the container
+
+After your IoC container has the class you need using bind or singleton, you can use the use method to return that instance.
+
+```javascript
+// This is going to return a instance of the Foo class
+const foo = app.use('foo');
+```
+
+## Service Providers
 
 ### Note
 
