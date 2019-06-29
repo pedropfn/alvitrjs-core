@@ -45,13 +45,18 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
 1. [Bootstraper](#bootstraper)
     1. [Create Server](#create-server)
     2. [Listen](#listen)
-2. [Service Providers](#service-providers)
-3. [Router](#router)
+2. [IoC Container](#ioc-container)
+    1. [What is IoC and DI](#what-is-ioc-and-di)
+    2. [How it works](#how-it-works)
+    3. [Binding and Singleton](#binding-and-singleton)
+    4. [Use the container](#use-the-container)
+3. [Service Providers](#service-providers)
+4. [Router](#router)
     1. [Methods](#methods)
     2. [Aliases](#aliases)
     3. [Middlewares](#router-middlewares)
-4. [Middlewares](#middlewares)
-5. [Env](#env)
+5. [Middlewares](#middlewares)
+6. [Env](#env)
 
 ## Bootstraper
 
