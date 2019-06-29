@@ -50,6 +50,9 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     2. [Binding and Singleton](#binding-and-singleton)
     3. [Use the container](#use-the-container)
 3. [Service Providers](#service-providers)
+    1. [What is a Service Provider](#what-is-a-service-provider)
+    2. [Setting your Providers](#setting-your-providers)
+    3. [Creating a Provider](#creating-a-provider)
 4. [Router](#router)
     1. [Methods](#methods)
     2. [Aliases](#aliases)
@@ -139,6 +142,55 @@ const foo = app.use('foo');
 
 ## Service Providers
 
+### What is a Service Provider
+
+A service provider is a way of creating pieces of application in a modular way and 'injecting' into the framework,
+it works by calling all services and registering them by IoC Container and Dependecy Injection.
+
+### Setting your Providers
+
+To use a service provider you should first create a folder called config and inside it a file called providers.js
+- config
+- - provider.js
+index.js
+
+That file is just an object with providers to call
+
+```javascript
+module.exports = {
+    foo: 'Folder\FooProvider'
+}
+```
+
+### Creating a Provider
+
+Every provider should extend the ServiceProvider class and obey to an implementation of IServiceProvider, that is a register function and possible a boot function.
+
+```javascript
+import Foo from './foo';
+import { ServiceProvider, IServiceProvider } from 'alvitrjs';
+
+class FooProvider extends ServiceProvider implements IServiceProvider {
+    register () {
+        // Here you can use the IoC container to register services to your application
+        this._app.singleton('foo' () => {
+            return new Foo();
+        });
+    }
+    
+    boot () {
+        // Here you can use any service from the application, because boot runs after all providers are registered.
+        const config = this._app.use('config');
+        const fooValue = config.get('FOO_VALUE');
+        
+        const foo = this._app.use('foo');
+        foo.setValue(fooValue);
+    }
+}
+```
+
+## Router
+
 ### Note
 
 > This readme is currently being written.
@@ -148,9 +200,15 @@ const foo = app.use('foo');
 > Currently these are what i'm currently thinking on adding and working on it.
 
 - [ ] Error Handling
+- [ ] Router Groups
+- [ ] Controllers
+- [ ] Better Http Requests and Responses
 - [ ] Getting Aliases
 - [ ] Rendering Template Engines
 - [ ] Better Middlewares
+- [ ] Refactoring
+- [ ] Optimization
+- [ ] Security
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
