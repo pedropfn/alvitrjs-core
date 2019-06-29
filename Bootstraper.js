@@ -46,16 +46,16 @@ var Bootstraper = /** @class */ (function () {
     };
     Bootstraper.prototype._setRegisteredProviders = function () {
         if (this._fileForProvidersExists(this._alvitrjsProvidersPath))
-            this._constructAndSetProviders(this._alvitrjsProvidersPath);
+            this._constructAndSetProviders(this._alvitrjsProvidersPath, path_1.default.resolve(__dirname));
         if (this._fileForProvidersExists(this._providersPath))
-            this._constructAndSetProviders(this._providersPath);
+            this._constructAndSetProviders(this._providersPath, this._rootPath);
     };
-    Bootstraper.prototype._constructAndSetProviders = function (servicePath) {
+    Bootstraper.prototype._constructAndSetProviders = function (servicePath, rootPath) {
         try {
             var application = require(servicePath);
             for (var key in application) {
                 try {
-                    var app = require(path_1.default.join(this._rootPath, application[key]));
+                    var app = require(path_1.default.join(rootPath, application[key]));
                     var constructor = Object.keys(app)[0];
                     var service = new app[constructor](this._ioc);
                     this._services.push(service);
