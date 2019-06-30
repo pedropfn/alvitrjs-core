@@ -55,8 +55,9 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     3. [Creating a Provider](#creating-a-provider)
 4. [Router](#router)
     1. [Methods](#methods)
-    2. [Aliases](#aliases)
-    3. [Middlewares](#router-middlewares)
+    2. [Fields from Request](#fields-from-request)
+    3. [Aliases](#aliases)
+    4. [Middlewares](#router-middlewares)
 5. [Middlewares](#middlewares)
 6. [Env](#env)
 
@@ -111,7 +112,7 @@ ioc.bind('foo', (app) => {
     return new foo();
 });
 
-// You can use another classes inside
+// You can use other classes inside
 ioc.bind('foo', (app) => {
     const bar = app.use('bar');
     return new foo(bar);
@@ -191,6 +192,71 @@ class FooProvider extends ServiceProvider implements IServiceProvider {
 ```
 
 ## Router
+
+The router class is being created by the service provider by calling a singleton, so anywhere you can use the IoC you can create routes,
+but its recommended to create inside the config folder a route file that has a export default function, you can change this folder and file by changing inside the .env the ROUTES_PATH variable.
+
+```javascript
+module.exports.default = (router) => {
+    // Here you can use the router to create your routes
+}
+```
+
+### Methods
+
+You can create any routes using those methods: GET, POST, PUT, PATCH, DELETE. The second parameter is going to be a closure that is going to be executed when the route is matched, it receives a context with the request, response and the ioc container.
+
+```javascript
+route.get('/', (context) => {
+    context.res.sendJson({hello: 'hello world'});
+});
+
+// You can use : so it can receive a variable when that route match
+route.post('/:id', (context) => {
+    context.req.getParam('id');
+});
+```
+
+### Fields from Request
+
+You can get the fields that you send by request using the context request object.
+
+```javascript
+route.post('/', (context) => {
+    // Get all the fields
+    context.req.getFields();
+    // Get a single field by name
+    context.req.getField('id');
+});
+```
+
+### Aliases
+
+You can set aliases to your routes by using as inside the route.
+
+```javascript
+route.post('/', (context) => {
+    context.res.sendJson({helloworld: 'hello world'});
+}).as('hello world');
+```
+
+### Middlewares
+
+You can use named middlewares before the route controller is called by using middleware.
+
+```javascript
+route.post('/', (context) => {
+    context.res.sendJson({helloworld: 'hello world'});
+}).middlewares('foo');  // This is going to call the foo middleware
+```
+
+```javascript
+route.post('/', (context) => {
+    context.res.sendJson({helloworld: 'hello world'});
+}).middlewares(['foo', 'bar']);  // You can also pass an array of named middlewares
+```
+
+## Middlewares
 
 ### Note
 
