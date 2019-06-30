@@ -58,10 +58,13 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     2. [Fields from Request](#fields-from-request)
     3. [Aliases](#aliases)
     4. [Middlewares](#middleware)
-5. [Middlewares](#middlewares)
+5. [Context](#context)
+    1. [Request](#request)
+    2. [Response](#response)
+6. [Middlewares](#middlewares)
     1. [Global](#global)
     2. [Named](#named)
-6. [Config](#config)
+7. [Config](#config)
 
 ## Bootstraper
 
@@ -256,6 +259,108 @@ route.post('/', (context) => {
 route.post('/', (context) => {
     context.res.sendJson({helloworld: 'hello world'});
 }).middlewares(['foo', 'bar']);  // You can also pass an array of named middlewares
+```
+
+## Context
+
+The context object is passed to multiple classes when that class needs a request, response and the IoC Container.
+
+### Request
+
+The request class receives the fields from any form that sends data, and also receives the parameters from the class that matches the route call.
+
+#### Properties
+
+```javascript
+route.get('/', (context) => {
+    // you can get the url that was called in any method or class that has a context
+    const url = context.req.url;
+    
+    // you can also get the method that was called
+    const method = context.req.method;
+    
+    // you also have the status code
+    const method = context.req.statusCode;
+});
+```
+
+```javascript
+// inside the middleware you can also set those for subsequent calls.
+(context) => { context.req.method = "POST" }
+```
+
+#### Fields from Forms
+
+```javascript
+route.post('/', (context) => {
+    // if the route receives fields from a form you can get all those fields and its values
+    const fields = context.req.getFields();
+    
+    // or you can get a specific field by name
+    const foo = context.req.getField('foo');
+});
+```
+
+#### Params from a Route
+
+```javascript
+route.get('/:foo/:bar', (context) => {
+    // if the route has parameters you can get all of them
+    const params = context.req.getParams();
+    
+    // or you can get a specific param by name
+    const foo = context.req.getParam('foo');
+});
+```
+
+### Response
+
+#### Header
+
+```javascript
+route.get('/', (context) => {
+    // you can set headers to the response object
+    context.res.setHeader('foo', 'fooValue');
+    
+    // headers can also receive objects as a value
+    context.res.setHeader('foo-bar', {
+        foo: 'foo',
+        bar: 'bar'
+    });
+});
+```
+
+#### Status
+
+```javascript
+route.get('/', (context) => {
+    // if you need to set a status code
+    context.res.setStatusCode(404);
+    
+    // you can also set a message
+    context.res.setStatusMessage('Page not Found');
+});
+```
+
+#### Responses
+
+Responses are used to send back to the client a response, so you should always only have one response at the end.
+
+```javascript
+route.get('/', (context) => {
+    // you can send an html file back to a server, it uses the rootPath plus the path you set
+    context.res.sendHtml('foo/foo.html');
+});
+```
+
+```javascript
+route.get('/', (context) => {
+    // you can also send a JSON response
+    context.res.sendJson({
+        foo: 'foo',
+        bar: 'bar'
+    });
+});
 ```
 
 ## Middlewares
