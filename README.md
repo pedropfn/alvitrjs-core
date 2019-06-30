@@ -57,9 +57,11 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     1. [Methods](#methods)
     2. [Fields from Request](#fields-from-request)
     3. [Aliases](#aliases)
-    4. [Middlewares](#router-middlewares)
+    4. [Middlewares](#middleware)
 5. [Middlewares](#middlewares)
-6. [Env](#env)
+    1. [Global](#global)
+    2. [Named](#named)
+6. [Config](#config)
 
 ## Bootstraper
 
@@ -240,7 +242,7 @@ route.post('/', (context) => {
 }).as('hello world');
 ```
 
-### Middlewares
+### Middleware
 
 You can use named middlewares before the route controller is called by using middleware.
 
@@ -257,6 +259,47 @@ route.post('/', (context) => {
 ```
 
 ## Middlewares
+
+Middlewares are functions that run before to upcoming requests, they can make some changes to upcoming requests and responses.
+To use them you should create a config folder and add a file called middlewares.js.
+
+```
+config/
+    middlewares.js
+index.js
+```
+
+### Global
+
+Global middlewares are functions that run before every request.
+
+```javascript
+module.exports.global = [
+    (context) => { console.log('global middleware') }
+]
+```
+
+### Named
+
+The named middleware is an object with a name and a function that run before a matched route that has those middlewares.
+
+```javascript
+module.exports.named = {
+    foo: (context) => { console.log('named middleware') }
+}
+```
+
+## Config
+
+The config service is a class that can store values with names, and get values from the .env file. You can easily use by just using the IoC to get the instance of the Config class.
+
+```javascript
+const config = ioc.use('config');
+
+config.set('FOO', 'FOO VALUE');
+// This will receive FOO VALUE
+const foo = config.get('FOO');
+```
 
 ### Note
 
