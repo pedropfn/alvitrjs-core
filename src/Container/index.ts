@@ -1,4 +1,4 @@
-import { IIoc, IBindings } from './Contracts/ioc';
+import { IIoc, IBindings } from '../Contracts/ioc';
 
 export default class Ioc implements IIoc{
     private _bindings: IBindings;

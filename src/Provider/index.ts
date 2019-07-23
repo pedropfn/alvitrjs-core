@@ -1,4 +1,4 @@
-import { IIoc } from './Contracts/ioc';
+import { IIoc } from '../Contracts/ioc';
 
 export default abstract class ServiceProvider {
     protected _app: IIoc;
