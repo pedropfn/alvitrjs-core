@@ -1,6 +1,6 @@
 import { IIoc, IBindings } from './Contracts/ioc';
 
-export class Ioc implements IIoc{
+export default class Ioc implements IIoc{
     private _bindings: IBindings;
 
     constructor () {
@@ -8,13 +8,13 @@ export class Ioc implements IIoc{
     }
     
     bind (namespace: string, closure: Function) {
-        this._isExpected(closure);
+        this._isExpected(closure, 'IoC.bind expects second parameter to be a closure:');
 
         this._bindings[namespace] = this._registerToNamespace(closure, false);
     }
 
     singleton (namespace: string, closure: Function) {
-        this._isExpected(closure);
+        this._isExpected(closure, 'IoC.singleton expects second parameter to be a closure');
 
         this._bindings[namespace] = this._registerToNamespace(closure, true);
     }
@@ -29,9 +29,9 @@ export class Ioc implements IIoc{
         return object.closure(this);
     }
 
-    private _isExpected (closure: Function) {
+    private _isExpected (closure: Function, errorMessage: string) {
         if (typeof (closure) !== 'function') {
-            throw Error('IoC.bind expects second parameter to be a closure: ' + closure);
+            throw Error(`${errorMessage}: ${closure}`);
         }
     }
 
