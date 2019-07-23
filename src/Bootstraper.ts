@@ -6,25 +6,29 @@ import formidable from 'formidable';
 
 import { IIoc } from './Contracts/ioc';
 import { Ioc } from './Ioc';
-import { IServiceProvider } from './Contracts/serviceProvider';
+import { IServiceProvider, IProviderPath } from './Contracts/serviceProvider';
 import { IContext, Routing } from 'router';
 
 export class Bootstraper {
     private _server: http.Server | undefined;
     private _ioc: IIoc;
     private _services: IServiceProvider[];
-    private _rootPath: string;
-    private _providersPath: string;
-    private _alvitrjsProvidersPath: string;
+    private _providersPath: IProviderPath;
+    private _alvitrjsProvidersPath: IProviderPath;
 
     constructor(rootPath: string, providersPath?: string) {
         this._ioc = new Ioc();
 
-        this._rootPath = rootPath;
+        const pp = providersPath ? providersPath : 'config/providers';
+        this._providersPath = {
+            path: pp,
+            root: rootPath
+        };
 
-        const pp = providersPath ? providersPath : 'config/providers.js';
-        this._providersPath = path.join(this._rootPath, pp);
-        this._alvitrjsProvidersPath = path.join(path.resolve(__dirname), 'config', 'providers.js');
+        this._alvitrjsProvidersPath = {
+            path: 'config/providers',
+            root: path.resolve(__dirname)
+        };
 
         this._services = [];
 
@@ -56,26 +60,24 @@ export class Bootstraper {
     listen(port?: number): void {
         port = port ? port : this._ioc.use('config').get('PORT') ? this._ioc.use('config').get('PORT') : 3000;
 
-        this._server ?
-            this._server.listen(port, () => {
+        this._server 
+            ? this._server.listen(port, () => {
                 console.log(`Listening to port ${port}`)
-            }) :
-            null;
+            })
+            : null;
     }
 
     private _setRegisteredProviders(): void {
-        if (this._fileForProvidersExists(this._alvitrjsProvidersPath))
-            this._constructAndSetProviders(this._alvitrjsProvidersPath, path.resolve(__dirname));
-        if (this._fileForProvidersExists(this._providersPath))
-            this._constructAndSetProviders(this._providersPath, this._rootPath);
+        this._constructAndSetProviders(this._alvitrjsProvidersPath);
+        this._constructAndSetProviders(this._providersPath);
     }
 
-    private _constructAndSetProviders(servicePath: string, rootPath: string): void {
+    private _constructAndSetProviders(servicePath: IProviderPath): void {
         try {
-            const application = require(servicePath);
+            const application = require(path.join(servicePath.root, servicePath.path));
             for (const key in application) {
                 try {
-                    const app = require(path.join(rootPath, application[key]));
+                    const app = require(path.join(servicePath.root, application[key]));
                     const constructor = Object.keys(app)[0];
 
                     const service: IServiceProvider = new app[constructor](this._ioc);
@@ -105,13 +107,8 @@ export class Bootstraper {
         this._services = [];
     }
 
-    private _fileForProvidersExists(path: string): boolean {
-        return fs.existsSync(path);
-    }
-
     private _resolveAllProviders() {
         this._registerProviders();
-        this._ioc.use('config').set('rootPath', this._rootPath);
         this._bootProviders();
         this._cleanProviders();
     }
