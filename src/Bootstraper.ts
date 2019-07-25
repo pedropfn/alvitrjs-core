@@ -3,7 +3,7 @@ import path from 'path';
 import { ServerOptions } from 'https';
 
 import { IIoc } from "./Contracts/ioc";
-import { IServiceProvider } from './Contracts/serviceProvider';
+import { IServiceProvider, IProviderPath } from './Contracts/serviceProvider';
 import Ioc from './Container';
 
 export default class Bootstraper {
@@ -23,9 +23,12 @@ export default class Bootstraper {
     private _startServer () {
         console.log('Starting the server: waiting for initiation!');
         this._app.use('event').once('serverInit', (arg: ServerOptions) => {
+            const PORT = this._app.use('config').has('port') ? this._app.use('config').get('port').result : 8080; 
             console.log('Initiating server');
-            http.createServer(arg).listen(8080, () => {
-                console.log(`Server started listening to port: 8080`);
+            const server = http.createServer(arg);
+
+            server.listen(PORT, () => {
+                console.log(`Server started listening to port: ${PORT}`);
             });
         });
     }
@@ -49,20 +52,26 @@ export default class Bootstraper {
             root: path.resolve(__dirname)
         };
 
-        const module = await import(path.join(coreProvidersPath.root, coreProvidersPath.path));
+        await this._loadModules(coreProvidersPath);
+
+        this._registerCoreProviders();
+        this._bootCoreProviders();
+        
+        this._app.use('config').set('root_path', this._rootPath);
+
+        this._startServer();
+    }
+
+    private async _loadModules (providersPath: IProviderPath) {
+        const module = await import(path.join(providersPath.root, providersPath.path));
 
         for (const key in module.default ) {
-            const loadedModule = await import(path.join(coreProvidersPath.root, coreProvidersPath.path , module.default[key]));
+            const loadedModule = await import(path.join(providersPath.root, providersPath.path , module.default[key]));
 
             const constructor = Object.keys(loadedModule)[0];
             const service = new loadedModule[constructor](this._app);
 
             this._services.push(service);
         }
-
-        this._registerCoreProviders();
-        this._bootCoreProviders();
-
-        this._startServer();
     }
 }

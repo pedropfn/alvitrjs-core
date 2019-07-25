@@ -1,3 +1,5 @@
 export default {
-    event: 'EventProvider'
+    event: 'EventProvider',
+    error: 'ErrorProvider',
+    config: 'ConfigProvider'
 }
