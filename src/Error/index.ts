@@ -2,7 +2,7 @@ import Event from "../Event";
 
 export default class Error extends Event {
     private _errors: string[] = [];
-    errorName: string = 'error';
+    errorName: string = 'System Error';
 
     getErrors () {
         return this._errors;

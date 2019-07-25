@@ -1,5 +1,6 @@
 import http from 'http';
 import path from 'path';
+import fs from 'fs';
 import { ServerOptions } from 'https';
 
 import { IIoc } from "./Contracts/ioc";
@@ -22,12 +23,10 @@ export default class Bootstraper {
 
     private _startServer () {
         console.log('Starting the server: waiting for initiation!');
+        const PORT = this._app.use('config').has('port') ? this._app.use('config').get('port').result : 8080;
         this._app.use('event').once('serverInit', (arg: ServerOptions) => {
-            const PORT = this._app.use('config').has('port') ? this._app.use('config').get('port').result : 8080; 
             console.log('Initiating server');
-            const server = http.createServer(arg);
-
-            server.listen(PORT, () => {
+            http.createServer(arg).listen(PORT, () => {
                 console.log(`Server started listening to port: ${PORT}`);
             });
         });
@@ -51,15 +50,32 @@ export default class Bootstraper {
             path: 'Providers',
             root: path.resolve(__dirname)
         };
-
+        
+        console.log('Loading core modules');
         await this._loadModules(coreProvidersPath);
-
+        
         this._registerCoreProviders();
         this._bootCoreProviders();
+
+        const config = this._app.use('config');
         
-        this._app.use('config').set('root_path', this._rootPath);
+        config.set('root_path', this._rootPath);
 
         this._startServer();
+
+        let providersPath = {
+            path: '',
+            root: this._rootPath
+        };
+
+        config.has('providers_path') ? providersPath.path = config.get('providers_path').result : providersPath.path = 'config/providers';
+
+        this._loadModules(providersPath).catch(err => {
+            const error = this._app.use('error');
+            error.throw(`${providersPath.path} could not be found or load!`);
+
+            console.log(error.getErrors());
+        });
     }
 
     private async _loadModules (providersPath: IProviderPath) {
