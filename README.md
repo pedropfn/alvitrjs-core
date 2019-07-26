@@ -162,7 +162,7 @@ import ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
 
 import Foo from './foo';
 
-class FooProvider extends ServiceProvider implements IServiceProvider {
+export default class FooProvider extends ServiceProvider implements IServiceProvider {
     register () {
         // Here you should use the IoC Container to register this service to your application
         this._app.singleton('foo' () => {
@@ -237,7 +237,7 @@ You can create a [Service Providers](#service-providers) to provide a new instan
 ```typescript
 import Event, ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
 
-class EventsProvider extends ServiceProvider implements IServiceProvider {
+export default class EventsProvider extends ServiceProvider implements IServiceProvider {
     register () {
         // A new instance of event to be used by your application.
         this._app.singleton('fooEvent' () => {
@@ -325,7 +325,7 @@ You can create a [Service Providers](#service-providers) to provide a new instan
 ```typescript
 import Error, ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
 
-class ErrorsProvider extends ServiceProvider implements IServiceProvider {
+export default class ErrorsProvider extends ServiceProvider implements IServiceProvider {
     register () {
         // A new instance of error to be used by your application.
         this._app.singleton('fooError' () => {
