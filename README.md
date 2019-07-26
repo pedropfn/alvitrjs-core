@@ -43,8 +43,8 @@ new Bootstraper(path.resolve(__dirname));
 ## Table of Contents
 
 1. [Bootstraper](#bootstraper)
-    1. [Create Server](#create-server)
-    2. [Listen](#listen)
+    1. [Creating a Server](#creating-a-server)
+    2. [Listening to a port](#listening-to-a-port)
 2. [IoC Container](#ioc-container)
     1. [What is IoC and DI](#what-is-ioc-and-di)
     2. [Binding and Singleton](#binding-and-singleton)
@@ -270,7 +270,7 @@ fooEvent.emit('foo');
 
 ### The Server Event
 
-The server event is a important part of AlvitrJS's Core, its by calling it that you can [Create a Server](#create-server).
+The server event is a important part of AlvitrJS's Core, its by calling it that you can [Create a Server](#creating-a-server).
 
 ```typescript
 const event = app.use('event');
