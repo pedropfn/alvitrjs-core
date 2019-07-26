@@ -9,8 +9,4 @@ export default class ConfigProvider extends ServiceProvider implements IServiceP
             return new Config();
         })
     }
-
-    boot () {
-        this._app.use('config').set('port', '8080');
-    }
 }

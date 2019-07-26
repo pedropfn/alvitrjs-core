@@ -1,7 +1,7 @@
 {
-  "name": "alvitrjs",
+  "name": "alvitrjs-core",
   "version": "1.0.0",
-  "description": "AlvitrJS is a modular microframework for nodejs web development.",
+  "description": "AlvitrJS's Core is a modular microframework for nodejs, that works using IOC and Service Providers to give you a better way of creating and handling websites.",
   "scripts": {
     "tsc": "tsc",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/index.ts"
@@ -22,7 +22,6 @@
     "@types/dotenv": "^6.1.1",
     "@types/node": "^12.6.8",
     "dotenv": "^8.0.0",
-    "router": "git+https://github.com/GustavoFenilli/router.git",
     "ts-node-dev": "^1.0.0-pre.39",
     "typescript": "^3.5.3"
   }
