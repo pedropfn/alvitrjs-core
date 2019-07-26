@@ -16,18 +16,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ServiceProvider_1 = __importDefault(require("../ServiceProvider"));
-var Config_1 = __importDefault(require("../Config"));
-var ConfigProvider = /** @class */ (function (_super) {
-    __extends(ConfigProvider, _super);
-    function ConfigProvider() {
+var events_1 = __importDefault(require("events"));
+var Event = /** @class */ (function (_super) {
+    __extends(Event, _super);
+    function Event() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    ConfigProvider.prototype.register = function () {
-        this._app.singleton('config', function () {
-            return new Config_1.default();
-        });
-    };
-    return ConfigProvider;
-}(ServiceProvider_1.default));
-exports.default = ConfigProvider;
+    return Event;
+}(events_1.default));
+exports.default = Event;

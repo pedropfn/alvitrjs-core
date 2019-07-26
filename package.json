@@ -1,9 +1,8 @@
 {
-  "name": "alvitrjs",
+  "name": "alvitrjs-core",
   "version": "1.0.0",
-  "description": "AlvitrJS is a modular microframework for nodejs web development.",
+  "description": "AlvitrJS's Core is a modular microframework for nodejs, that works using IOC and Service Providers to give you a better way of creating and handling websites.",
   "main": "./index.js",
-  "types": "./@types/index.d.ts",
   "keywords": [
     "alvitrjs",
     "modular",
@@ -13,10 +12,10 @@
     "provider"
   ],
   "author": "Gustavo Fenilli",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "@types/node": "^12.0.4",
-    "config": "git+https://github.com/GustavoFenilli/config.git",
-    "router": "git+https://github.com/GustavoFenilli/router.git"
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^12.6.8",
+    "dotenv": "^8.0.0"
   }
 }

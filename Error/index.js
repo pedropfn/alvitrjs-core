@@ -16,18 +16,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var ServiceProvider_1 = __importDefault(require("../ServiceProvider"));
-var Config_1 = __importDefault(require("../Config"));
-var ConfigProvider = /** @class */ (function (_super) {
-    __extends(ConfigProvider, _super);
-    function ConfigProvider() {
-        return _super !== null && _super.apply(this, arguments) || this;
+var Event_1 = __importDefault(require("../Event"));
+var Error = /** @class */ (function (_super) {
+    __extends(Error, _super);
+    function Error() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._errors = [];
+        _this.errorName = 'System Error';
+        return _this;
     }
-    ConfigProvider.prototype.register = function () {
-        this._app.singleton('config', function () {
-            return new Config_1.default();
-        });
+    Error.prototype.getErrors = function () {
+        return this._errors;
     };
-    return ConfigProvider;
-}(ServiceProvider_1.default));
-exports.default = ConfigProvider;
+    Error.prototype.throw = function (errorMessage) {
+        this._errors.push(this.message() + " -> " + errorMessage);
+    };
+    Error.prototype.message = function () {
+        return "There was a unexpected error!: " + this.errorName;
+    };
+    return Error;
+}(Event_1.default));
+exports.default = Error;

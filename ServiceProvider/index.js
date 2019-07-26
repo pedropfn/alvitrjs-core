@@ -6,4 +6,4 @@ var ServiceProvider = /** @class */ (function () {
     }
     return ServiceProvider;
 }());
-exports.ServiceProvider = ServiceProvider;
+exports.default = ServiceProvider;

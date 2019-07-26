@@ -17,17 +17,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ServiceProvider_1 = __importDefault(require("../ServiceProvider"));
-var Config_1 = __importDefault(require("../Config"));
-var ConfigProvider = /** @class */ (function (_super) {
-    __extends(ConfigProvider, _super);
-    function ConfigProvider() {
+var Event_1 = __importDefault(require("../Event"));
+var EventProvider = /** @class */ (function (_super) {
+    __extends(EventProvider, _super);
+    function EventProvider() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    ConfigProvider.prototype.register = function () {
-        this._app.singleton('config', function () {
-            return new Config_1.default();
+    EventProvider.prototype.register = function () {
+        this._app.singleton('event', function () {
+            return new Event_1.default();
         });
     };
-    return ConfigProvider;
+    return EventProvider;
 }(ServiceProvider_1.default));
-exports.default = ConfigProvider;
+exports.default = EventProvider;
