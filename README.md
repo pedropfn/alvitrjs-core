@@ -1,6 +1,6 @@
-# AlvitrJS
+# AlvitrJS's Core
 
-> AlvitrJS is a modular microframework for nodejs, that works using IOC and Service Providers to give you a better way of creating and handling websites.
+> AlvitrJS's Core is a modular microframework for nodejs, that works using IOC and Service Providers to give you a better way of creating and handling websites.
 
 ### Warning
 
@@ -14,10 +14,10 @@
 
 ### Instalation
 
-Use NPM to install the package
+You can use NPM to install alvitrjs's core
 
 ```bash
-npm install --save https://github.com/GustavoFenilli/alvitrjs
+npm install --save https://github.com/GustavoFenilli/alvitrjs-core
 ```
 
 ### Usage
@@ -26,18 +26,18 @@ Using Typescript
 
 ```typescript
 import path from 'path'
-import { Bootstraper } from 'alvitrjs';
+import Bootstraper from 'alvitrjs-core';
 
-new Bootstraper(path.resolve(__dirname)).createServer().listen();
+new Bootstraper(path.resolve(__dirname));
 ```
 
 Using Javascript
 
 ```javascript
 const path = require('path');
-const { Bootstraper } = require('alvitrjs');
+const Bootstraper = require('alvitrjs');
 
-new Bootstraper(path.resolve(__dirname)).createServer().listen();
+new Bootstraper(path.resolve(__dirname));
 ```
 
 ## Table of Contents
@@ -51,47 +51,52 @@ new Bootstraper(path.resolve(__dirname)).createServer().listen();
     3. [Use the container](#use-the-container)
 3. [Service Providers](#service-providers)
     1. [What is a Service Provider](#what-is-a-service-provider)
-    2. [Setting your Providers](#setting-your-providers)
-    3. [Creating a Provider](#creating-a-provider)
-4. [Router](#router)
-    1. [Methods](#methods)
-    2. [Fields from Request](#fields-from-request)
-    3. [Aliases](#aliases)
-    4. [Middlewares](#middleware)
-5. [Context](#context)
-    1. [Request](#request)
-    2. [Response](#response)
-6. [Middlewares](#middlewares)
-    1. [Global](#global)
-    2. [Named](#named)
-7. [Config](#config)
+    2. [Creating a Provider](#creating-a-provider)
+    3. [Setting your Providers](#setting-your-providers)
+4. [Event Service](#event-service)
+    1. [How to use the Event Service](#how-to-use-the-event-service)
+    2. [Creating your own Event](#creating-your-own-event)
+    3. [The Server Event](#the-server-event)
+5. [Error Service](#error-service)
+    1. [How to use the Error Service](#how-to-use-the-error-service)
+    2. [Creating your own Error Service](#creating-your-own-error-service)
+6. [Config Service](#config-service)
 
 ## Bootstraper
 
 ```typescript
 import path from 'path'
-import { Bootstraper } from 'alvitrjs';
+import Bootstraper from 'alvitrjs-core';
 
-const boot = new Bootstraper(path.resolve(__dirname))
+new Bootstraper(path.resolve(__dirname))
 ```
-### Create server
 
-You can create a new server by simpling calling the createServer method in the bootstraper class.
+### Creating a server
+
+After the bootstraper is instantiated a event is set to start a server when everything is ready.
+
+```typescript
+this._app.use('event').once('serverInit', (arg: ServerOptions) => {
+    http.createServer(arg); // the server is created when serverInit is emited with the arguments of ServerOptions passed to it.
+});
+```
+
+### Listening to a port
+
+A port is set by checking if there is a PORT variable in the config module, if not the port is always going to be 8080.
 
 ```javascript
-boot.createServer();
+const PORT = this._app.use('config').has('port') ? this._app.use('config').get('port').result : 8080;
+this._app.use('event').once('serverInit', (arg: ServerOptions) => {
+    http.createServer(arg).listen(PORT); // Starts to listen to the PORT
+});
 ```
 
-### Listen
+You can change the PORT by creating a .env file at the root of the application and setting it up.
 
-You can start to listen to your server by calling listen, listen by itself runs on por 3000
-
-```javascript
-// Starts to listen on port 3000
-boot.listen();
+```.env
+PORT=80
 ```
-
-You can change this behaviour by creating a .env file at the root of the application with PORT
 
 ## IoC Container
 
@@ -111,37 +116,32 @@ You can use both bind and singleton, when using the IoC container.
 Bind works by creating a new class every time you call the IoC for that class, it uses a closure to know what you need,
 you can use any other class inside the bind or singleton by using the passed ioc to it.
 
-```javascript
-// This creates a binding for the class
-ioc.bind('foo', (app) => {
+```typescript
+// This creates a binding for the class foo
+ioc.bind('foo', () => {
     return new foo();
 });
 
-// You can use other classes inside
+// You can also use the container inside the bind to pass a class to another class if needed
 ioc.bind('foo', (app) => {
     const bar = app.use('bar');
     return new foo(bar);
 });
 ```
-the same goes for singleton, but singleton creates a class only on the first call, the other calls will be using the first created class.
 
-```javascript
-// This creates a binding for the class
+The same goes for singleton, but the singleton method creates a class only on the first call, the other calls will be using the cached object.
+
+```typescript
 ioc.singleton('foo', (app) => {
     return new foo();
 });
-
-// You can use another classes inside
-ioc.singleton('foo', (app) => {
-    const bar = app.use('bar');
-    return new foo(bar);
-});
 ```
-### Use the container
+
+### Using the container
 
 After your IoC container has the class you need using bind or singleton, you can use the use method to return that instance.
 
-```javascript
+```typescript
 // This is going to return a instance of the Foo class
 const foo = app.use('foo');
 ```
@@ -150,41 +150,27 @@ const foo = app.use('foo');
 
 ### What is a Service Provider
 
-A service provider is a way of creating pieces of application in a modular way and 'injecting' into the framework,
-it works by calling all services and registering them by IoC Container and Dependecy Injection.
-
-### Setting your Providers
-
-To use a service provider you should first create a folder called config and inside it a file called providers.js.
-```
-config/
-    provider.js
-index.js
-```
-That file is just an object with providers to call
-
-```javascript
-module.exports = {
-    foo: 'Folder\FooProvider'
-}
-```
+A service provider is a way of creating pieces of application in a modular way and injecting into the framework,
+it works by calling all services and registering them using the [IoC Container](#ioc-container).
 
 ### Creating a Provider
 
-Every provider should extend the ServiceProvider class and obey to an implementation of IServiceProvider, that is a register function and possible a boot function.
+Every provider should extend the ServiceProvider class and obey to an implementation of IServiceProvider, that is a register method and possible a boot method.
 
-```javascript
+```typescript
+import ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
+
 import Foo from './foo';
-import { ServiceProvider, IServiceProvider } from 'alvitrjs';
 
 class FooProvider extends ServiceProvider implements IServiceProvider {
     register () {
-        // Here you can use the IoC container to register services to your application
+        // Here you should use the IoC Container to register this service to your application
         this._app.singleton('foo' () => {
             return new Foo();
         });
     }
     
+    // the boot method is meant to set values that you class need or should change inside the application and modules.
     boot () {
         // Here you can use any service from the application, because boot runs after all providers are registered.
         const config = this._app.use('config');
@@ -196,209 +182,171 @@ class FooProvider extends ServiceProvider implements IServiceProvider {
 }
 ```
 
-## Router
+### Setting your Providers
 
-The router class is being created by the service provider by calling a singleton, so anywhere you can use the IoC you can create routes,
-but its recommended to create inside the config folder a route file that has a export default function, you can change this folder and file by changing inside the .env the ROUTES_PATH variable.
+After creating your provider you have to set it to the application by exporting a object with name and path to your service.
 
-```javascript
-module.exports.default = (router) => {
-    // Here you can use the router to create your routes
+```typescript
+export default {
+    // The path is relative to the root path passed to the bootstraper.
+    foo: 'FooFolder\FooProvider'
 }
 ```
 
-### Methods
-
-You can create any routes using those methods: GET, POST, PUT, PATCH, DELETE. The second parameter is going to be a closure that is going to be executed when the route is matched, it receives a context with the request, response and the ioc container.
-
-```javascript
-route.get('/', (context) => {
-    context.res.sendJson({hello: 'hello world'});
-});
-
-// You can use : so it can receive a variable when that route match
-route.post('/:id', (context) => {
-    context.req.getParam('id');
-});
-```
-
-### Fields from Request
-
-You can get the fields that you send by request using the context request object.
-
-```javascript
-route.post('/', (context) => {
-    // Get all the fields
-    context.req.getFields();
-    // Get a single field by name
-    context.req.getField('id');
-});
-```
-
-### Aliases
-
-You can set aliases to your routes by using as inside the route.
-
-```javascript
-route.post('/', (context) => {
-    context.res.sendJson({helloworld: 'hello world'});
-}).as('hello world');
-```
-
-### Middleware
-
-You can use named middlewares before the route controller is called by using middleware.
-
-```javascript
-route.post('/', (context) => {
-    context.res.sendJson({helloworld: 'hello world'});
-}).middlewares('foo');  // This is going to call the foo middleware
-```
-
-```javascript
-route.post('/', (context) => {
-    context.res.sendJson({helloworld: 'hello world'});
-}).middlewares(['foo', 'bar']);  // You can also pass an array of named middlewares
-```
-
-## Context
-
-The context object is passed to multiple classes when that class needs a request, response and the IoC Container.
-
-### Request
-
-The request class receives the fields from any form that sends data, and also receives the parameters from the class that matches the route call.
-
-#### Properties
-
-```javascript
-route.get('/', (context) => {
-    // you can get the url that was called in any method or class that has a context
-    const url = context.req.url;
-    
-    // you can also get the method that was called
-    const method = context.req.method;
-    
-    // you also have the status code
-    const method = context.req.statusCode;
-});
-```
-
-```javascript
-// inside the middleware you can also set those for subsequent calls.
-(context) => { context.req.method = "POST" }
-```
-
-#### Fields from Forms
-
-```javascript
-route.post('/', (context) => {
-    // if the route receives fields from a form you can get all those fields and its values
-    const fields = context.req.getFields();
-    
-    // or you can get a specific field by name
-    const foo = context.req.getField('foo');
-});
-```
-
-#### Params from a Route
-
-```javascript
-route.get('/:foo/:bar', (context) => {
-    // if the route has parameters you can get all of them
-    const params = context.req.getParams();
-    
-    // or you can get a specific param by name
-    const foo = context.req.getParam('foo');
-});
-```
-
-### Response
-
-#### Header
-
-```javascript
-route.get('/', (context) => {
-    // you can set headers to the response object
-    context.res.setHeader('foo', 'fooValue');
-    
-    // headers can also receive objects as a value
-    context.res.setHeader('foo-bar', {
-        foo: 'foo',
-        bar: 'bar'
-    });
-});
-```
-
-#### Status
-
-```javascript
-route.get('/', (context) => {
-    // if you need to set a status code
-    context.res.setStatusCode(404);
-    
-    // you can also set a message
-    context.res.setStatusMessage('Page not Found');
-});
-```
-
-#### Responses
-
-Responses are used to send back to the client a response, so you should always only have one response at the end.
-
-```javascript
-route.get('/', (context) => {
-    // you can send an html file back to a server, it uses the rootPath plus the path you set
-    context.res.sendHtml('foo/foo.html');
-});
-```
-
-```javascript
-route.get('/', (context) => {
-    // you can also send a JSON response
-    context.res.sendJson({
-        foo: 'foo',
-        bar: 'bar'
-    });
-});
-```
-
-## Middlewares
-
-Middlewares are functions that run before to upcoming requests, they can make some changes to upcoming requests and responses.
-To use them you should create a config folder and add a file called middlewares.js.
+by default the folder structure and file name should be as follow:
 
 ```
 config/
-    middlewares.js
-index.js
+    providers
 ```
 
-### Global
+It is relative to the root path that was used to create the bootstraper, you can also change this by creating a .env file at the root of the application and setting it PROVIDERS_PATH.
 
-Global middlewares are functions that run before every request.
-
-```javascript
-module.exports.global = [
-    (context) => { console.log('global middleware') }
-]
+```.env
+PROVIDERS_PATH='foo/bar'
 ```
 
-### Named
+## Event Service
 
-The named middleware is an object with a name and a function that run before a matched route that has those middlewares.
+The event service is just a extended EventEmmiter from Node itself, it is meant to be a way of creating reactive elements that work when they are needed and called.
 
-```javascript
-module.exports.named = {
-    foo: (context) => { console.log('named middleware') }
+### How to use the Event Service
+
+You can use the event from the [IoC Container](#ioc-container) where it is available, it has the same methods as the EventEmmiter.
+
+```typescript
+const event = app.use('event');
+
+// You can create an event to be called, giving it a name and a closure to be executed.
+event.on('foo', () => {
+    // This is going to be called only when foo is emited.
+    console.log('foo was called!');
+});
+
+// This is going to emit a foo call to the event stack.
+event.emit('foo');
+// The result will be: foo was called!
+```
+
+### Creating your own Event
+
+Because the event could be used by the core, you should try to avoid to use directly.
+
+You can create a [Service Providers](#service-providers) to provide a new instance of event:
+
+```typescript
+import Event, ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
+
+class EventsProvider extends ServiceProvider implements IServiceProvider {
+    register () {
+        // A new instance of event to be used by your application.
+        this._app.singleton('fooEvent' () => {
+            return new Event();
+        });
+
+        // A new instance of event to be used by your application.
+        this._app.singleton('barEvent' () => {
+            return new Event();
+        });
+    }
 }
 ```
 
-## Config
+After is created you should [Set your new Provider](#setting-your-providers) and you can use it by calling the [IoC Container](#ioc-container) where it is available.
+
+```typescript
+const fooEvent = app.use('fooEvent');
+
+// You can create an event to be called, giving it a name and a closure to be executed.
+fooEvent.on('foo', () => {
+    // This is going to be called only when foo is emited.
+    console.log('foo was called!');
+});
+
+// This is going to emit a foo call to the event stack.
+fooEvent.emit('foo');
+// The result will be: foo was called!
+```
+
+### The Server Event
+
+The server event is a important part of AlvitrJS's Core, its by calling it that you can [Create a Server](#create-server).
+
+```typescript
+const event = app.use('event');
+
+// serverInit is a special case that will emit a call to start a new server, you need to pass a closure with request and response.
+event.emit('serverInit', (req, res) => {
+    // Here goes your code for each request call to the server
+});
+// This is going to start a new server
+```
+
+## Error Service
+
+### How to use the Error Service
+
+The error service extends the event class, so you can [use the event methods](#how-to-use-the-event-service) to be able to react to errors when they are called.
+
+```typescript
+const error = app.use('error');
+
+// You can create an error to be called, giving it a name and a closure to be executed.
+error.on('validationError', () => {
+    // This is going to be called only when validationError is emited.
+    console.log('it was not valid');
+});
+
+// This is going to emit a validationError call to the event stack.
+error.emit('validationError');
+// The result will be: it was not valid
+```
+
+You can also throw errors and get an array of those errors when you need them.
+
+```typescript
+// Validation.ts
+const error = app.use('error');
+
+// You throw an error 
+error.throw('validationError', 'it was not valid');
+
+// Controller.ts
+const error = app.use('error');
+
+// You get the errors array.
+error.getErrors();
+```
+
+### Creating your own Error Service
+
+You can create a [Service Providers](#service-providers) to provide a new instance of error:
+
+```typescript
+import Error, ServiceProvider, { IServiceProvider } from 'alvitrjs-core';
+
+class ErrorsProvider extends ServiceProvider implements IServiceProvider {
+    register () {
+        // A new instance of error to be used by your application.
+        this._app.singleton('fooError' () => {
+            return new Error();
+        });
+
+        // A new instance of error to be used by your application.
+        this._app.singleton('barError' () => {
+            return new Error();
+        });
+    }
+}
+```
+
+After is created you should [Set your new Provider](#setting-your-providers) and you can use it by calling the [IoC Container](#ioc-container) where it is available.
+
+## Config Service
 
 The config service is a class that can store values with names, and get values from the .env file. You can easily use by just using the IoC to get the instance of the Config class.
 
-```javascript
+```typescript
 const config = ioc.use('config');
 
 config.set('FOO', 'FOO VALUE');
@@ -412,15 +360,10 @@ const foo = config.get('FOO');
 
 ## In development
 
-> Currently these are what i'm currently thinking on adding and working on it.
+> These are what I'm currently working on it.
 
-- [ ] Error Handling
-- [ ] Router Groups
-- [ ] Controllers
-- [ ] Better Http Requests and Responses
-- [ ] Getting Aliases
-- [ ] Rendering Template Engines
-- [ ] Better Middlewares
+- [x] Error Handling
+- [ ] Better Error Handling
 - [ ] Refactoring
 - [ ] Optimization
 - [ ] Security
